@@ -1,0 +1,56 @@
+﻿@model IEnumerable<FamilyGo.Models.Activity>
+
+@{
+    ViewBag.Title = "Find Activities for 7-12 years old";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/lightbox.css" rel="stylesheet" />
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+
+<body>
+    <!--navigation bar-->
+    <div class="container about-heading">
+        <h5>
+            <a href="@Url.Action("Index","Home")">Home /</a>
+            <a href="@Url.Action("Information","Activities")">Activities </a>
+        </h5>
+    </div>
+    <!--//navigation bar-->
+    <!--tab selection for different age group-->
+    <div class="about-heading container">
+        <ul id="myTab" class="nav nav-tabs" role="tabpanel">
+            <li role="presentation"><a href="@Url.Action("Information","Activities")" role="tab">3-6 years old</a> </li>
+            <li role="presentation" class="active"><a href="@Url.Action("InformationTwo","Activities")" role="tab">7-12 years old</a></li>
+        </ul>
+    </div>
+    <!--//tab selection for different age group-->
+    <!--Activities for 7-12 years old-->
+    <div class="about-heading container">
+        <h4>Activities for 7-12 years old:</h4>
+    </div>
+    <div class="gallery container">
+        <div class="gallery-grids">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 gallery-grid">
+                    <div class="grid">
+                        <figure class="effect-roxy">
+                            <a class="image-link" href="@Url.Action("Index", "Places",new {i= item.Name,age = "7" })">
+                                <img src="~/Image/@Html.DisplayFor(modelItem => item.Name) .jpg" alt="" />
+                                <figcaption>
+                                    <h2>@Html.DisplayFor(modelItem => item.Name)</h2>
+                                </figcaption>
+                            </a>
+                        </figure>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <!--//Activities for 7-12 years old-->
+</body>   
+    <script src="~/Scripts/lightbox-plus-jquery.min.js"></script>
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }

@@ -1,0 +1,373 @@
+﻿@model String
+@{
+    /**/
+
+    /**/
+
+    ViewBag.Title = "Events";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6/js/select2.min.js"></script>
+<link href="~/Content/lightbox.css" rel="stylesheet" />
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+<link href="~/Content/loading.css" rel="stylesheet" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<style>
+    input[type="text"] {
+        padding: 2px;
+        border-radius: 4px;
+    }
+
+    input.form-control {
+        font-size: 14px;
+    }
+
+    .btn:not(:disabled):not(.disabled) {
+        cursor: pointer;
+    }
+
+    .daterangepicker .drp-buttons .btn {
+        margin-left: 8px;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 4px 8px;
+        line-height: 1.5;
+        border-radius: .2rem;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        -webkit-appearance: button;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .center-in-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+
+    .example_b {
+        color: #fff !important;
+        background: #66cdaa;
+        padding: 7px;
+        border-radius: 50px;
+        display: inline-block;
+        border: none;
+    }
+
+        .example_b:hover {
+            text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
+            -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+            -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+            transition: all 0.4s ease 0s;
+        }
+</style>
+
+<!--navigation bar-->
+<div>
+    <div class="about-heading container">
+        <h5>
+            <a href="@Url.Action("Index","Home")">Home / </a>
+            <a href="@Url.Action("Index","Event")">Events</a>
+        </h5>
+    </div>
+</div>
+<!--//navigation bar-->
+
+<p id="testjson"></p>
+<div style=" font-family:Georgia; padding:0px;" class="container address-agileinfo">
+    <div style="margin:1em;padding:0px;">
+        <select id="selectSuburb" style="margin-right:2%; font-size:1em;width:150px;" onchange="go();"></select>&nbsp &nbsp &nbsp &nbsp
+        <input type="checkbox" id="free" value="Is Free" onclick="freeOrNot()" style="margin-right:0%" onchange="go();" />&nbsp Is Free
+        &nbsp &nbsp Date Range:
+        <input type="text" name="daterange" style="margin-right:2%;" onchange="go();" />
+
+        <select id="categories" style="margin-right:2%" onchange="go();">
+            <option value="0">--All Categories--</option>
+            <option value="1">Exhibitions</option>
+            <!-- <option value="2">Shows</option>-->
+            <option value="3">Family</option>
+            <option value="4">Festivals and Carnivals</option>
+            <option value="5">Education</option>
+            <option value="6">Film</option>
+            <option value="7">Hiking and Camping</option>
+        </select>
+        <div class="button_cont" align="center" style="margin-top:0.2em;display: inline-block;margin-left:1em;"><a class="example_b" href="javascript:clear123();" target="_blank" rel="nofollow noopener">Clear</a></div>
+
+    </div>
+</div>
+
+<div id="eventGallery" style=" justify-content:center; text-align: center;" class="container">
+</div>
+<div class="center-in-center" id="tonerInfowarning" style="padding: 20px;text-align:right;color:red;position:absolute; float:initial;background-color:gray;opacity:0.8;border-radius:10%;text-align:center;"><div class="loader" id="tonerInfowarning" style="display: inline-block;"></div><p>Loading, please wait<p></div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="name" style="color:black"> </h4>
+            </div>
+            <div class="modal-body">
+                <img id="image" style="width: 350px;" />
+                <h4>Description</h4>
+                <p id="description"> </p>
+                <br />
+                <h4>Category</h4>
+                <p id="category"> </p>
+                <br />
+                <h4>Time</h4>
+                <p id="time"> </p>
+                <br />
+                <h4>Address</h4>
+                <p id="address"> </p>
+                <br />
+                <h4>Official Website</h4>
+                <a id="websiteLink"></a>
+                <p id="website"> </p>
+                <br />
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var start_time = "0", end_time = "0";
+    $(function () {
+        $('input[name="daterange"]').daterangepicker({
+            opens: 'left',
+            minDate: (new Date()),
+        }, function (start, end, label) {
+            start_time = start.format('YYYY-MM-DD');
+            end_time = end.format('YYYY-MM-DD');
+            //console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+        }).val('');
+
+    });
+</script>
+<script>
+    var isFree = "0", point = "0", category = "0";
+    var json;
+    var eventGallery = document.getElementById("eventGallery");
+
+    var suburbs;
+    var div1;
+    var image;
+    var nameDiv;
+    var nameH4;
+    var figcaption;
+    // basicEvents(isFree, point, start_time, end_time, category);
+    loadSuburb();
+    //calling this function can use API to get events based on the conditions user selected
+    function go() {
+        console.log("go");
+        point = document.getElementById("selectSuburb").options[document.getElementById("selectSuburb").selectedIndex].value;
+        category = document.getElementById("categories").options[document.getElementById("categories").selectedIndex].value;
+        basicEvents(isFree, point, start_time, end_time, category);
+    }
+    //using the user inouts as parameters to send request to backend, get events and load them in the eventGallery element
+    function basicEvents(isFree, point, start_time, end_time, category) {
+        var blank = document.createElement("h3");
+        blank.setAttribute("id", "blank");
+        blank.setAttribute("style", "text-align:center;margin: 10px;");
+        blank.innerText = "\n\n\n\n\n\n\n\n\n";
+        document.getElementById("eventGallery").appendChild(blank);
+        paras = document.getElementsByClassName("col-md-3 col-lg-3");
+
+        $.ajax({
+            url: "/Event/GetEvents",
+            type: "GET",//http request method is get
+            dataType: "json", //the returned data type is json
+            data: { isFree: isFree, point: point, start_time: start_time, end_time: end_time, category: category },
+            beforeSend: function () {
+                $('#tonerInfowarning').show();
+            },
+            async: true,//async or not
+            success: function (data) {
+                var parasLength = paras.length;
+                
+                for (var i = 0; i < parasLength; i++) {
+                    //delete all the elements in eventGallery
+
+                    if (paras[0] != null) { paras[0].parentNode.removeChild(paras[0]); }
+                }
+                var noResultRemove = document.getElementById("noResult");
+                if (noResultRemove != null)
+                    noResultRemove.parentNode.removeChild(noResultRemove);
+
+
+
+                json = data["events"];
+                console.log(json);
+                $('#tonerInfowarning').hide();
+                var blankRemove = document.getElementById("blank");
+                if (blankRemove != null)
+                    blankRemove.parentNode.removeChild(blankRemove);
+                loadEvents();
+            },
+            error: function () {
+                console.log("error");
+            }
+        });
+
+    }
+
+    //this function can load the given events into the eventGallery
+    function loadEvents() {
+        if (json.length == 0) {
+            alert("Sorry, no result was found!!!");
+            var noResult = document.createElement("h3");
+            noResult.setAttribute("id", "noResult");
+            noResult.setAttribute("style", "text-align:center;margin: 10px;");
+            noResult.innerText = "Sorry, no result was found!!!";
+            noResult.style.color = "gray";
+            noResult.style.padding = "20px";
+            document.getElementById("eventGallery").appendChild(noResult);
+        }
+        for (var i = 0; i < json.length; i++) {
+            var div2 = document.createElement("div");
+            div1 = document.createElement("div");
+            div1.setAttribute("class", "gallery-grid events container");
+            div1.setAttribute("id", json[i]["id"]);
+            div1.setAttribute("style", "font-family:Georgia;padding:0px;margin:1em;display: inline-block; width:200px;");
+            div1.setAttribute("onclick", "EventClicked(this)");
+
+            div3 = document.createElement("div");
+            div3.setAttribute("class", "grid");
+            figure = document.createElement("figure");
+            figure.setAttribute("class", "effect-roxy");
+            figure.setAttribute("style", "height:140px");
+
+            image = document.createElement("img");
+            image.setAttribute("src", json[i]["images"]["images"][0]["transforms"]["transforms"][2]["url"]);
+            image.setAttribute("alt", "No Image avalible");
+            image.style.opacity = 1;
+            figcaption = document.createElement("figcaption");
+            nameH4 = document.createElement("h4");
+            nameH4.setAttribute("style", "font-size:1em; color: black;font-family:Georgia;height:3em;font-weight:900;");
+            nameH4.innerText = json[i]["name"];
+            div1.appendChild(div3);
+            div3.appendChild(figure);
+            div3.appendChild(nameH4);
+            figure.appendChild(image);
+            div2.appendChild(div1);
+            div2.setAttribute("class", "col-md-3 col-lg-3");
+            div2.setAttribute("style", "text-align: center;");
+            if (json[i]["name"] != "Skull2 – Jewellery Exhibition")
+                eventGallery.appendChild(div2);
+        }
+        eventGallery.setAttribute("style", "margin: auto; text-align: center;");
+    }
+
+    // when one of the event is clicked, execute this function to show the information of this event
+    function EventClicked(obj) {
+        var eventId = parseInt(obj.id);
+        var selectedEvent;
+        for (var i = 0; i < json.length; i++) {
+            if (eventId == json[i]["id"]) { selectedEvent = json[i]; }
+        }
+        document.getElementById("image").setAttribute("src", selectedEvent["images"]["images"][0]["transforms"]["transforms"][3]["url"]);
+        document.getElementById("name").innerText = selectedEvent.name;
+        document.getElementById("description").innerText = selectedEvent.description;
+        document.getElementById("category").innerText = selectedEvent.category.name;
+        document.getElementById("address").innerText = selectedEvent.location_summary;
+        if (selectedEvent.web_sites.web_sites[0].url != null && selectedEvent.web_sites.web_sites[0].url != "") {
+            document.getElementById("website").innerText = "";
+            document.getElementById("websiteLink").setAttribute("href", selectedEvent.web_sites.web_sites[0].url);
+            document.getElementById("websiteLink").innerText = selectedEvent.web_sites.web_sites[0].url;
+
+        }
+        else {
+            document.getElementById("website").innerText = "No website avaliable";
+            document.getElementById("websiteLink").setAttribute("href", "");
+            document.getElementById("websiteLink").innerText = "";
+        }
+
+        document.getElementById("time").innerText = "From: " + selectedEvent.datetime_start + "\u00A0\u00A0\u00A0To: " + selectedEvent.datetime_end;
+        $("#myModal").modal();
+    }
+    //get suburbs from backend and load them into the select element
+    function loadSuburb() {
+        document.getElementById("selectSuburb").options.add(new Option("--Select Suburb--", 0));
+        $.ajax({
+            url: "/Event/GetSuburbs",
+            type: "GET",//the http method is get
+            dataType: "json", //the returned data type is json
+            data: {},
+            async: true,//async or not
+            success: function (data) {
+                suburbs = data;
+                for (var i = 0; i < suburbs.length; i++) {
+                    var newOption = new Option(suburbs[i].SuburbName, suburbs[i].Lat + "," + suburbs[i].Lon);
+                    newOption.setAttribute("style", "font-size:0.8em");
+                    document.getElementById("selectSuburb").options.add(newOption);
+
+                }
+            },
+            error: function () {
+                console.log("error");
+            }
+        })
+    }
+    // when the clear button is clicked, execute this functio to reset the element in the filter
+    function clear123() {
+        sortSelectOptions("#selectSuburb");
+        document.getElementById("selectSuburb").options[0].selected = true;
+        document.getElementById("free").checked = false;
+        sortSelectOptions("#categories");
+        document.getElementById("categories").options[0].selected = true;
+        console.log("clicked");
+        $('input[name="daterange"]').daterangepicker({
+            opens: 'left',
+            minDate: (new Date()),
+        }, function (start, end, label) {
+            start_time = start.format('YYYY-MM-DD');
+            end_time = end.format('YYYY-MM-DD');
+            console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+        }).val('');
+        isFree = "0"; point = "0"; category = "0"; start_time = "0"; end_time = "0";
+        go();
+    }
+    //get the velue of checkbox for free or not
+    function freeOrNot() {
+        if (document.getElementById("free").checked) { isFree = "1"; }
+        else { isFree = "0"; }
+    }
+
+    //sort the options of select element based on the alphabet
+    function sortSelectOptions(selectElement) {
+        var options = $(selectElement + " option");
+        options.sort(function (a, b) {
+            if (a.text.toUpperCase() > b.text.toUpperCase()) return 1;
+            else if (a.text.toUpperCase() < b.text.toUpperCase()) return -1;
+            else return 0;
+        });
+        $(selectElement).empty().append(options);
+    }
+</script>
+@section Scripts{
+    @Scripts.Render("~/Scripts/DataTables/jquery.dataTables.js")
+    @Scripts.Render("~/Scripts/DataTables/dataTables.bootstrap.js")
+}

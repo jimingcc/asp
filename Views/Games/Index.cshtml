@@ -1,0 +1,112 @@
+﻿@model IEnumerable<FamilyGo.Models.Game>
+
+@{
+    ViewBag.Title = "Games";
+}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+<!--navigation bar-->
+<div class="container about-heading">
+    <h5>
+        <a href="@Url.Action("Index","Home")">Home /</a>
+        <a href="@Url.Action("Information","Activities")">Activities /</a>
+        <a href="@Url.Action("Index","Games")">Games</a>
+    </h5>
+</div>
+<!--//navigation bar-->
+
+<div class="container" style="padding-top:1em">
+    <div>
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 gallery-grid">
+                <div class="grid">
+                    <figure class="effect-roxy" id="@item.GameId" style="margin:1em;font-family:Georgia;padding:0px;height:150px;" onclick="gameClicked(this)">
+                        <img src="~/Image/@Html.DisplayFor(modelItem => item.Name) .jpg" alt="No Image avalible" style="width:110%;height:110%">
+                        <figcaption>
+                            <h4 style="padding-bottom:0.2em;padding-top:0.2em;margin-top: 15% !IMPORTANT"><strong>@Html.DisplayFor(modelItem => item.Name)</strong></h4>
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+
+        }
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" id="name"> </h4>
+                    </div>
+
+
+                    <div class="modal-body">
+                        <img id="img" />
+                        <p id="description"> </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    @Scripts.Render("~/Scripts/DataTables/jquery.dataTables.js")
+    @Scripts.Render("~/Scripts/DataTables/dataTables.bootstrap.js")
+
+    <script>
+        $(document).ready(function () {
+            $('.table').DataTable();
+
+        });
+    </script>
+    <script type="text/javascript">
+        // if one of the game is clicked, execute this function to get the information from backend
+        function gameClicked(obj) {
+            var gameId = parseInt(obj.id);
+            var x;
+            $.ajax({
+                url: "/Games/GetGame",
+                type: "GET",//http method is get
+                dataType: "json", //returned data type is json
+                data: { id: gameId },
+                async: false,//async or not
+                success: function (data) {
+                    x = data;
+                },
+                error: function () {
+                    console.log("error");
+                }
+            })
+            document.getElementById("name").innerText = x.Name;
+            document.getElementById("description").innerText = x.Description;
+            var n = replaceSpace(x.Name);
+            console.log(n);
+            document.getElementById("img").src = "@Url.Content("~/Image/")" + n + " .jpg";
+            $("#myModal").modal();
+        }
+
+        function replaceSpace(str) {
+            let output = '';
+            for (let i = 0, len = str.length; i < len; i++) {
+                if (str[i] == '%20') {
+                    output += ' ';
+                } else {
+                    output += str[i];
+                }
+            }
+            return output;
+        }
+    </script>
+   
+
+}

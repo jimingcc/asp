@@ -1,0 +1,479 @@
+﻿@model IEnumerable<FamilyGo.Models.Place>
+@Scripts.Render("~/bundles/jquery")
+
+@{
+    ViewBag.Title = "Places";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<link href="~/Content/loading.css" rel="stylesheet" />
+<style>
+    .center-in-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+    </style>
+<body>
+    <div class="container">
+        <!--navigation bar-->
+        <div class="about-heading">
+            <h5>
+                <a href="@Url.Action("Index","Home")">Home /</a>
+                <a href="@Url.Action("Information","Activities")">Activities /</a>
+                <a href="@Url.Action("Index","Places",new { i = ViewBag.activityName})">@ViewBag.activityName </a>
+            </h5>
+        </div>
+        <!--//navigation bar-->
+        <!--filter for change acitvities-->
+        <div class="address-agileinfo" style="margin-top:1em; font-family:Georgia;padding-bottom:3em;">
+            <div class="col-md-3" style="padding-top:0.4em">
+                <p style="color:black"><strong>CHANGE ACTIVITY:</strong></p>
+            </div>
+            <div class="col-md-5" style="padding-top:0.2em">
+                Age Group: &nbsp;
+                <input type="checkbox" name="age" value="6" />3-6 years old &nbsp;
+                <input type="checkbox" name="age" value="7" />7-12 years old<br />
+            </div>
+            <div class="col-md-4" style="padding-top:0.2em">
+                Activities: &nbsp;<select id="Select1" onchange="search()" style="width:150px;"></select>
+            </div>
+        </div>
+        <!--//filter for change acitvities-->
+        <!--map with place information-->
+        <div class="mapanddata">
+            <div id="map" style="height:425px; padding-top:3em"></div>
+            <div style="padding-top:1em">
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <!--modal header-->
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title" id="name">header</h4>
+                            </div>
+                            <!--//modal header-->
+                            <!--modal body-->
+                            <div class="modal-body">
+                                <div class=" w3-agileits">
+                                    <div class="col-md-12 about-wthreegrids">
+                                        <img id="image" />
+                                    </div>
+                                    <div class="col-md-12 about-wthreegrids" style="margin-top:1em">
+                                        <h3 class="w3ltitle">Information</h3>
+                                        <div class="w3ls-pince">
+                                            <div class="pince-right">
+                                                <h4>RATING:(1-5)</h4>
+                                                <p id="rating">No rating avaliable</p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                        <div class="w3ls-pince agileits-w3layouts">
+                                            <div class="pince-right">
+                                                <h4>PHONE NUMBER:</h4>
+                                                <p id="phone">No phone number avaliable</p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                        <div class="w3ls-pince agileits-w3layouts">
+                                            <div class="pince-right">
+                                                <h4>WEBSITE:</h4>
+                                                <a id="websiteLink"></a>
+                                                <p id="website">No website avaliable</p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                        <div class="w3ls-pince agileits-w3layouts">
+                                            <div class="pince-right">
+                                                <h4>STATUS: </h4>
+                                                <p id="open">No opening status avabliable</p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                        <div class="w3ls-pince agileits-w3layouts">
+                                            <div class="pince-right">
+                                                <h4>WEEKDAY: </h4>
+                                                <p id="weekday">No weekday information avaliable</p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                        <div class="w3ls-pince agileits-w3layouts">
+                                            <div class="pince-right">
+                                                <h4>ADDRESS: </h4>
+                                                <p id="address">No address information avaliable</p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                        <div class="w3ls-pince agileits-w3layouts">
+                                            <div class="pince-right">
+                                                <h4>REVIEWS: </h4>
+                                                <p id="review">
+                                                    No review avaliable
+                                                </p>
+                                            </div>
+                                            <div class="clearfix"> </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"> </div>
+                                </div>
+                            </div>
+                            <!--modal footer-->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                            <!--//modal footer-->
+                        </div>
+                        <!-- //Modal content-->
+                    </div>
+                </div>
+                <div class ="center-in-center" id ="tonerInfowarning" style="padding: 20px;text-align:right;color:red;position:absolute; float:initial;background-color:gray;opacity:0.8;border-radius:10%;text-align:center;"><div class="loader" id="tonerInfowarning" style="display: inline-block;"></div><p>Loading, please wait<p></div>
+
+                <!-- //Modal -->
+                <table style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.PlaceId)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Name)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Address)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Facility)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Lat)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Lon)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Suburb)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Activity.Name)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr class="coordinates" style="display:none;">
+                            <td class="id">
+                                @Html.DisplayFor(modelItem => item.PlaceId)
+
+
+                            </td>
+                            <td class="name">
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Address)
+                            </td>
+                            <td class="description">
+                                @Html.DisplayFor(modelItem => item.Facility)
+                            </td>
+                            <td class="latitude">
+                                @Html.DisplayFor(modelItem => item.Lat)
+                            </td>
+                            <td class="longitude">
+                                @Html.DisplayFor(modelItem => item.Lon)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Suburb)
+                            </td>
+                            <td class="ActivityName">
+                                @Html.DisplayFor(modelItem => item.Activity.Name)
+                            </td>
+                            <td>
+                                @Html.ActionLink("Edit", "Edit", new { id = item.PlaceId }) |
+                                @Html.ActionLink("Details", "Details", new { id = item.PlaceId }) |
+                                @Html.ActionLink("Delete", "Delete", new { id = item.PlaceId })
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+        <!--//map with place information-->
+    </div>
+</body>
+
+<script>
+    $('#tonerInfowarning').hide();
+    var map;
+    var locations = [];
+    var InforObj = [];
+    var dis = 0.05;
+    //initial google map
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: -37.835163, lng: 144.979678 },
+            zoom: 12
+        });
+        navigator.geolocation.getCurrentPosition(c);
+    }
+
+    //get current location and mark it on the map
+    function c(pos) {
+        var clat = parseFloat(pos.coords.latitude);
+        var clon = parseFloat(pos.coords.longitude);
+        $(".coordinates").each(function () {
+            var id = $(".id", this).text().trim();
+            var name = $(".name", this).text().trim();
+            var longitude = $(".longitude", this).text().trim();
+            var latitude = $(".latitude", this).text().trim();
+            var description = $(".description", this).text().trim();
+            var activityName = $(".ActivityName", this).text().trim();
+            // Create a point data structure to hold the values.
+            console.log(activityName);
+            var point = {
+                "id": id,
+                "name": name,
+                "latitude": parseFloat(latitude),
+                "longitude": parseFloat(longitude),
+                "description": description
+            };
+            if (activityName == "Dancing" || activityName == "Animal" || activityName == "Adventure and Theme Park" || activityName == "Others" || activityName == "Garden") { locations.push(point); }
+            else {
+                if (point.latitude < (clat + dis) && point.latitude > (clat - dis) && point.longitude < (clon + dis) && point.longitude > (clon - dis)) { locations.push(point); }
+            }
+        });
+
+        var image = {
+            url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+            // This marker is 20 pixels wide by 32 pixels high.
+            size: new google.maps.Size(100, 50),
+            // The origin for this image is (0, 0).
+            origin: new google.maps.Point(0, 0),
+            // The anchor for this image is the base of the flagpole at (0, 32).
+            anchor: new google.maps.Point(0, 32)
+        };
+        var marker = new google.maps.Marker({
+            position: { lat: clat, lng: clon },
+            map: map,
+            title: 'Your current location',
+            icon: image
+        });
+        addMarkerInfo();
+        map.setCenter({ lat: clat, lng: clon });
+    }
+
+    //add marker on the map
+    function addMarkerInfo() {
+        for (var i = 0; i < locations.length; i++) {
+            var contentString = '<div id="content">' + '<h5 style="color:black;font-family:Georgia">' + locations[i].name + '</h4></br>' +
+                '<a href = "#myModal" style="color:blue" data-toggle="modal"><u>More Details</u></a></div>';
+            const marker = new google.maps.Marker({
+                id: locations[i].id,
+                position: { lat: locations[i].latitude, lng: locations[i].longitude },
+                map: map
+            });
+
+            const infowindow = new google.maps.InfoWindow({
+
+                content: contentString,
+                maxWidth: 200
+            });
+            marker.addListener('click', function () {
+                var x;
+                $.ajax({
+                    url: "/Places/GetDetail",
+                    type: "GET",//the http method is get
+                    dataType: "json", //the returned method is json
+                    data: { id: marker.id },
+                    async: true,//async or not
+                    beforeSend: function () {
+                        $('#tonerInfowarning').show();
+                    },
+                    success: function (data) {
+                        x = data;
+                        initmodal(x);
+                        $('#tonerInfowarning').hide();
+                        $("#myModal").modal();
+                    },
+                    error: function () {
+                        console.log("error");
+                    }
+                })
+                //initial modal and add the information into it
+                function initmodal(x) {
+                    document.getElementById("address").innerText = x.address;
+                    document.getElementById("rating").innerText = x.rating;
+                    document.getElementById("phone").innerText = x.phoneNumber;
+                    if (x.website == "No website avaliable.")
+                    {
+                        document.getElementById("website").innerText = x.website;
+                        document.getElementById("websiteLink").setAttribute("href", "");
+                        document.getElementById("websiteLink").innerText = "";
+                    }
+                    else
+                    {
+                        document.getElementById("website").innerText = "";
+                        document.getElementById("websiteLink").setAttribute("href", x.website);
+                        document.getElementById("websiteLink").innerText = x.website;
+                    }
+                    document.getElementById("open").innerText = x.openingNow;
+                    document.getElementById("name").innerText = x.name;
+                    var weekdayStr = "";
+                    if (x.weekday != "No weekday information avaliable.") {
+                        var json1 = JSON.parse(x.weekday);
+                        for (var i = 0; i < json1.length; i++) {
+                            weekdayStr = weekdayStr + json1[i] + "\n";
+                        }
+                    }
+                    else {
+                        weekdayStr = x.weekday + "\n";
+                    }
+
+                    document.getElementById("weekday").innerText = weekdayStr;
+                    document.getElementById("address").innerText = x.address;
+                    var reviewStr = "";
+                    if (x.review != "No review avaliable.") {
+                        var json = JSON.parse(x.review);
+                        for (var i = 0; i < json.length; i++) {
+                            reviewStr = reviewStr + json[i].author_name + "\n";
+                            reviewStr = reviewStr + json[i].relative_time_description + "\n";
+                            reviewStr = reviewStr + json[i].text + "\n\n";
+                        }
+                    }
+                    else {
+                        reviewStr = x.review + "\n";
+                    }
+                    document.getElementById("review").innerText = reviewStr;
+                    document.getElementById("image").setAttribute("src", x.imUrl);
+                }
+            });
+        }
+        locations = [];
+    }
+    function closeOtherInfo() {
+        if (InforObj.length > 0) {
+            InforObj[0].set("marker", null);
+            InforObj[0].close();
+            InforObj.length = 0;
+        }
+    }
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJeTABC7AwjSI-x7dm2cVlbHvA3yN65HA&callback=initMap" async defer></script>
+
+<script>
+    $(document).ready(function () {
+        $('input[type=checkbox][name=age]').change(function () {
+            if (this.value == '0') {
+                test()
+            }
+            else if (this.value == '1') {
+                test();
+            }
+            else {
+                test();
+            };
+        });
+    });
+
+
+    var obj = document.getElementsByName("age");
+    if ("@ViewBag.ageGroup" == "All") { obj[0].checked = true; obj[1].checked = true; test(); }
+    if ("@ViewBag.ageGroup" == "3") { obj[0].checked = true; obj[1].checked = false; test(); }
+    if ("@ViewBag.ageGroup" == "7") { obj[0].checked = false; obj[1].checked = true; test(); }
+    var select = document.getElementById("Select1");
+    var place = "@ViewBag.place";
+    for (var i = 0; i < select.options.length; i++) {
+        if (select.options[i].innerHTML == place) {
+            select.options[i].selected = true;
+            break;
+        }
+    }
+
+    // add the options for the select element 
+    function test() {
+        var checked1 = false;
+        var checked2 = false;
+        var obj = document.getElementsByName("age");
+            if (obj[0].checked) {
+                checked1 = true;
+        }
+        if (obj[1].checked) {
+            checked2 = true;
+        }
+        var childRet = document.getElementById("Select1");
+        for (var i = childRet.childNodes.length - 1; i >= 0; i--) {
+            childRet.removeChild(childRet.childNodes.item(i));
+        }
+        var activities = '@ViewBag.activities';
+        var tmpRet = {
+            "DATA1": { "Park": "Park", "Animal": "Animal", "Adventure and Theme Park": "Adventure and Theme Park","Others":"Others","Garden":"Garden","X":"X"},
+            "DATA2": {  "Park": "Park", "Animal": "Animal", "Adventure and Theme Park": "Adventure and Theme Park", "Others": "Others", "Garden": "Garden", "X": "X"},
+            "DATA3": { "A.R.Football": "A.R.Football", "Badminton": "Badminton", "Baseball": "Baseball", "Basketball": "Basketball", "Cricket": "Cricket", "Cycling": "Cycling", "Dancing": "Dancing", "Netball": "Netball", "Skating": "Skating", "Soccer": "Soccer", "Swimming": "Swimming", "Table Tennis": "Table Tennis", "Tennis": "Tennis", "Park": "Park", "Animal": "Animal", "Adventure and Theme Park": "Adventure and Theme Park", "Others": "Others", "Garden": "Garden", "X": "X"}
+        };
+        var ret = document.createDocumentFragment();
+        var tmpObj;
+        if (checked1 && !checked2) { tmpObj = tmpRet["DATA2"] }
+        else if (!checked1 && checked2) { tmpObj = tmpRet["DATA3"] }
+        else if (!checked1 && !checked2) {tmpObj = {}; }
+        else { tmpObj = tmpRet["DATA1"] }
+        for (var key in tmpObj) {
+            if (key != "X") {
+                var newop = document.createElement("option");
+                newop.id = key;
+                newop.value = key;
+                newop.appendChild(document.createTextNode(tmpObj[key]));
+                ret.appendChild(newop);
+            }
+        }
+        document.getElementById("Select1").add(new Option("-select activity-", 0));
+        document.getElementById("Select1").appendChild(ret);
+        document.getElementById("Select1").options[0].selected = true;
+    }
+    // get the checkbox's value for age 
+    function search() {
+        var id = document.getElementsByName('age');
+        var age = "All";
+        if (id[0].checked && id[1].checked) {
+            age = "All";
+        }
+        if (id[0].checked && !id[1].checked) {
+            age ="3";
+        }
+       if (!id[0].checked && id[1].checked) {
+            age = "7";
+        }
+
+
+        if (document.getElementById("Select1").value == 'Games') { location.href = '/Games/Index'; }
+        else if (document.getElementById("Select1").value == '') {
+            alert("select an activities")
+        }
+        else {
+            console.log(document.getElementById("Select1").value);
+            location.href = '/Places?i=' + document.getElementById("Select1").value + "&age=" + age;
+        }
+    }
+</script>
+
+@section Scripts{
+    @Scripts.Render("~/Scripts/DataTables/jquery.dataTables.js")
+    @Scripts.Render("~/Scripts/DataTables/dataTables.bootstrap.js")
+}
+
+
+
+
